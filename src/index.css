@@ -1,4 +1,95 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-@tailwind variants;
+@import "tailwindcss";
+
+/* Paleta de Apustore: los verdes del sitio y el rojo del logo. */
+@theme {
+  --color-bosque: #052e16;
+  --color-musgo: #14532d;
+  --color-helecho: #166534;
+  --color-hoja: #86efac;
+  --color-brote: #22c55e;
+  --color-apu: #e30613;
+  --color-apu-oscuro: #991b1b;
+  --color-carbon: #201e1f;
+  --color-papel: #f6f5f1;
+  /* verde oficial de WhatsApp, solo para el botón de pedido */
+  --color-whatsapp: #25d366;
+
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --ease-salida: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-cajon: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --animate-subir: subir 600ms var(--ease-salida) both;
+  --animate-sello: sello 900ms var(--ease-salida) both;
+  --animate-revelar: revelar 800ms var(--ease-salida) both;
+  --animate-pagina: pagina 280ms var(--ease-salida) both;
+  --animate-latido: latido 1400ms ease-in-out infinite;
+  --animate-globo: globo 320ms var(--ease-salida);
+
+  @keyframes subir {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  /* el logo cae como un sello sobre la tela */
+  @keyframes sello {
+    0% { opacity: 0; transform: scale(1.35) rotate(-8deg); filter: blur(6px); }
+    60% { opacity: 1; transform: scale(0.96) rotate(1deg); filter: blur(0); }
+    100% { opacity: 1; transform: scale(1) rotate(0); }
+  }
+  /* el titulo aparece como tinta que se corre de abajo hacia arriba */
+  @keyframes revelar {
+    from { clip-path: inset(100% 0 0 0); transform: translateY(12px); }
+    to { clip-path: inset(0 0 0 0); transform: translateY(0); }
+  }
+  @keyframes pagina {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes latido {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  @keyframes globo {
+    0% { transform: scale(0.6); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+}
+
+/* fondos del sitio (versiones livianas en jpg de bg.png y about.svg) */
+@utility bg-index {
+  background-image: url(/bg.jpg);
+}
+
+@utility bg-products {
+  background-image: url(/about.jpg);
+}
+
+/* todo lo que se presiona responde al dedo */
+@utility presionable {
+  transition: transform 160ms var(--ease-salida), background-color 200ms ease, color 200ms ease;
+  &:active { transform: scale(0.97); }
+}
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-bosque);
+    color: var(--color-papel);
+  }
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; }
+  ::selection { background: var(--color-apu); color: white; }
+  :focus-visible { outline: 2px solid var(--color-hoja); outline-offset: 3px; border-radius: 6px; }
+  * { scrollbar-width: thin; scrollbar-color: var(--color-helecho) transparent; }
+  a { text-underline-offset: 3px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}

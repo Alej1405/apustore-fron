@@ -1,7 +1,9 @@
 import { ProductoKartSelecct } from './../types/index';
 import { StateCreator } from "zustand"; 
 import { createNotificationSlice, NotificationSliceType } from './notificationSlice';
-import emailjs from "@emailjs/browser"
+import { CmsSliceType } from './cmsSlice';
+import { contactoRespaldo } from '../data/respaldo';
+import { formatPrecio, whatsappLink } from '../utils/formato';
 
 export type KartSliceType ={
     kart: ProductoKartSelecct []
@@ -10,10 +12,19 @@ export type KartSliceType ={
     kartCount: () => number
     laodFromStorage: () => void
     clearKart: () => void
-    sendKartInfo: (phone: string, email: string) => Promise<void>
+    sendKartWhatsapp: () => void
 }
 
-export const createKartSlice : StateCreator<KartSliceType & NotificationSliceType, [], [], KartSliceType> = (set, get, api) => ({
+//arma el mensaje del pedido: una linea por producto con su color y talla
+function mensajePedido(kart: ProductoKartSelecct[]){
+    const lineas = kart.map((p) => {
+        const detalle = [p.color && `color ${p.color}`, p.size && `talla ${p.size}`].filter(Boolean).join(', ')
+        return `• ${p.nombre} (${formatPrecio(p.precio_venta)})${detalle ? ` — ${detalle}` : ''}`
+    })
+    return `Hola Apustore, quiero hacer este pedido:\n${lineas.join('\n')}`
+}
+
+export const createKartSlice : StateCreator<KartSliceType & NotificationSliceType & CmsSliceType, [], [], KartSliceType> = (set, get, api) => ({
     kart: [],
     handleKart: (producto) => {
         if(get().kartExist(producto.id)){
@@ -45,9 +56,9 @@ export const createKartSlice : StateCreator<KartSliceType & NotificationSliceTyp
     laodFromStorage: ()=>{
         const storeKart = localStorage.getItem('kart')
         if(storeKart){
-            set({
-                kart:JSON.parse(storeKart)
-            })
+            //el carrito guardado con la version anterior no tiene slug: se descarta
+            const kart = (JSON.parse(storeKart) as ProductoKartSelecct[]).filter((p) => p.slug)
+            set({ kart })
         }
     },
 
@@ -56,42 +67,14 @@ export const createKartSlice : StateCreator<KartSliceType & NotificationSliceTyp
         localStorage.removeItem('kart');
     },
 
-    sendKartInfo: async (phone: string, email: string) => {
-        const kart = get().kart;
-        try {
-            const templateParams = {
-                phone,
-                email,
-                kart: JSON.stringify(kart, null, 2)
-            };
-
-            await emailjs.send(
-                'service_2k37yko', // Reemplaza con tu Service ID
-                'template_1fo4yuc', // Reemplaza con tu Template ID
-                templateParams,
-                'XYL0aFgXab9o0L49j' // Reemplaza con tu User ID
-            );
-
-            createNotificationSlice(set, get, api).showNotification({ 
-                text: 'Información del carrito enviada correctamente',
-                error: false
-            });
-            // Limpiar el carrito y el localStorage
-            get().clearKart();
-        } catch (error) {
-            if (error instanceof Error) {
-                createNotificationSlice(set, get, api).showNotification({ 
-                    text: `Error al enviar la información del carrito: ${error.message}`,
-                    error: true
-                });
-            } else {
-                createNotificationSlice(set, get, api).showNotification({ 
-                    text: 'Error al enviar la información del carrito',
-                    error: true
-                });
-            }
-        }
+    //envia el pedido por whatsapp al numero del CMS (o al del respaldo)
+    sendKartWhatsapp: () => {
+        const numero = get().contacto?.whatsapp ?? contactoRespaldo.whatsapp
+        window.open(whatsappLink(numero, mensajePedido(get().kart)), '_blank', 'noopener')
+        createNotificationSlice(set, get, api).showNotification({ 
+            text: 'Te llevamos a WhatsApp para confirmar tu pedido',
+            error: false
+        });
+        get().clearKart();
     }
-
-
 })

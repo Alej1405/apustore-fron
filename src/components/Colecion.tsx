@@ -1,57 +1,37 @@
 import { Link } from "react-router-dom"
-import { LazyLoadImage } from 'react-lazy-load-image-component';
-import 'react-lazy-load-image-component/src/effects/blur.css';
+import type { Coleccion } from "../types"
+import { mediaUrl } from "../utils/formato"
+import { esMuestra } from "../data/respaldo"
 
-interface ColecionProps {
-        coleccion: {
-        id: number
-        name: string
-        descripcion: string
-        imagen: string
-        }
-    }
-
-    const Colecion: React.FC<ColecionProps> = ({ coleccion }) => {
-
-        // Convertir URL relativa a absoluta si es necesario
-            const imageUrl = coleccion.imagen.startsWith('http') ? coleccion.imagen : `https://app.apustore-ec.com/storage/colect/${coleccion.imagen}`
-            const id_coleccion = coleccion.id
+    //tarjeta de coleccion: la foto manda, el nombre va sobre ella
+    const Colecion = ({ coleccion }: { coleccion: Coleccion }) => {
 
             return (
-                <div className="bg-red-900/50 backdrop-blur-sm my-3 mx-3 rounded-lg space-y-5 pb-4 md:w-full md:w-max-1/3 inline-block mt-5 pt-5">
-                    <div>
-                        <h2 className="uppercase text-center text-white font-semibold mt-3 mb-3">
-                            {coleccion.name}
-                        </h2>
-                    <div className="w-11/12 m-auto mt-4 overflow-hidden">
-                            <LazyLoadImage
-                                src={imageUrl}
-                                alt={coleccion.name}
-                                className="hover:scale-125 hover:rotate-2 transition-transform"
-                                effect="blur"
-                                placeholderSrc="vite.svg"
-                            />
-                    </div>
-                    </div>
-                    <div className="mx-6">
-                        <div>
-                            <p className="text-sm text-slate-200 font-light mb-3">
-                                {coleccion.descripcion}
-                            </p>
-                        </div>
-                    <div className="mt-3 mb-5">
-                        <span className="text-white uppercase text-xs">
-                        Unidades en esta coleccion <span className="text-white text-sm font-semibold left-4">
-                        14 Unidades</span>
+                <Link
+                    to={`/coleccion/productos/${coleccion.slug}`}
+                    className="presionable group relative block aspect-[4/5] w-64 shrink-0 snap-start overflow-hidden rounded-3xl bg-musgo md:w-auto"
+                >
+                    <img
+                        src={mediaUrl(coleccion.imagen)}
+                        alt=""
+                        loading="lazy"
+                        className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-salida group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-bosque via-bosque/30 to-transparent" />
+                    {esMuestra(coleccion) && (
+                        <span className="absolute left-3 top-3 rounded-full bg-white/85 px-2.5 py-0.5 text-[11px] font-semibold text-bosque">Muestra</span>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 p-5">
+                        <h2 className="font-display text-2xl font-bold leading-tight text-white">{coleccion.nombre}</h2>
+                        {coleccion.descripcion && (
+                            <p className="mt-1 line-clamp-2 text-sm text-papel/80">{coleccion.descripcion}</p>
+                        )}
+                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-hoja">
+                            {coleccion.products_count} {coleccion.products_count === 1 ? 'producto' : 'productos'}
+                            <i className="ri-arrow-right-up-line transition-transform duration-300 ease-salida group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true"></i>
                         </span>
                     </div>
-                    <Link
-                        to={`/coleccion/productos/${id_coleccion}`}
-                        className="uppercase rounded-lg bg-green-900/50 hover:bg-red-900 text-white text-xs p-3 mt-6 transition-colors">
-                        ver todos los productos
-                    </Link>
-                    </div>
-                </div>
+                </Link>
             )
         }
         

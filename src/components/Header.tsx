@@ -1,147 +1,72 @@
-import { useState, useEffect} from "react";
 import { NavLink, Link } from "react-router-dom"
 import { useAppStore } from "../stores/useAppStore";
+import { useEsMovil } from "../hooks/useEsMovil";
+import { useLogo } from "../hooks/useLogo";
+
+const ENLACES = [
+    { to: '/nosotros', texto: 'Nosotros' },
+    { to: '/colecciones', texto: 'Catálogo' },
+    { to: '/contactos', texto: 'Contactos' },
+]
 
 const Header = () => {
 
     const kartCount = useAppStore((state)=> state.kartCount())
-    const [flag, setFlag] = useState("hidden")
-    
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const esMovil = useEsMovil()
+    const logo = useLogo()
 
-    //menu hamburguesa
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-    };
-
-
-    useEffect(() => {
-        if (kartCount !== 0) {
-            setFlag("absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full px-2");
-        } else {
-            setFlag("hidden");
-        }
-    }, [kartCount]);
-
-    console.log(kartCount)
-
+    //en el celular: barra superior minima; la navegacion esta abajo (NavMovil)
+    if (esMovil) {
+        return (
+            <header className="sticky top-0 z-30 flex h-14 items-center justify-between bg-bosque/70 px-4 backdrop-blur-xl pt-[env(safe-area-inset-top)]">
+                <Link to="/" className="flex items-center gap-2">
+                    <img src={logo} alt="Logo de Apustore" className="size-8" />
+                    <span className="font-display text-lg font-bold">Apu Store</span>
+                </Link>
+                <Link to="/contactos" aria-label="Contacto" className="presionable grid size-9 place-items-center rounded-full bg-white/10">
+                    <i className="ri-whatsapp-line text-lg text-hoja" aria-hidden="true"></i>
+                </Link>
+            </header>
+        )
+    }
 
     return (
-        <nav className="bg-green-900/50 backdrop-blur-sm text-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav className="sticky top-0 z-30 bg-musgo/60 backdrop-blur-md text-white">
+            <div className="max-w-7xl mx-auto px-8">
                 <div className="flex items-center justify-between h-16">
-                <div className="flex items-center">
-                    <div>
+                    <NavLink to="/" className="flex items-center gap-3">
+                        <img src={logo} alt="Logo de Apustore" className="w-10 transition-transform duration-300 ease-salida hover:rotate-[-8deg]"/>
+                        <span className="font-display text-lg font-bold">Apu Store</span>
+                    </NavLink>
+                    <div className="flex items-center gap-1">
+                        {ENLACES.map((e) => (
+                            <NavLink
+                                key={e.to}
+                                to={e.to}
+                                className={({isActive})=>
+                                    `presionable rounded-md px-3 py-2 ${isActive ? 'bg-hoja/20 font-semibold text-hoja' : 'hover:bg-white/10'}`
+                                }>
+                                {e.texto}
+                            </NavLink>
+                        ))}
                         <NavLink
-                            to="/"
-                            className="text-lg font-bold flex flex-row items-center gap-3">
-                                <img src="vite.svg" alt="Logo de Apustore" className="w-10"/>
-                                <h2>Apu Store</h2>
-                        </NavLink>
-
-                    </div>
-                    </div>
-                    <div className="hidden md:flex space-x-4">
-                        <NavLink
-                            to="/nosotros" 
+                            to="/kart"
+                            aria-label={`Pedido, ${kartCount} productos`}
                             className={({isActive})=>
-                                isActive ? 'relative hover:bg-green-300/40 px-3 py-2 rounded-md text-red-700/80 font-bold bg-green-300/40' : 'relative hover:bg-green-300/40 px-3 py-2 rounded-md'
+                                `presionable relative ml-2 grid size-10 place-items-center rounded-full ${isActive ? 'bg-hoja/20 text-hoja' : 'hover:bg-white/10'}`
                             }>
-                            Nosotros
+                            <i className="ri-shopping-bag-3-line text-lg" aria-hidden="true"></i>
+                            {kartCount > 0 && (
+                                <span key={kartCount} className="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-apu px-1 text-xs font-bold animate-globo">
+                                    {kartCount}
+                                </span>
+                            )}
                         </NavLink>
-                        <NavLink
-                            to="/colecciones"
-                            className={({ isActive }) =>
-                            isActive
-                                ? 'relative hover:bg-green-300/40 px-3 py-2 rounded-md text-red-700/80 font-bold bg-green-300/40'
-                                : 'relative hover:bg-green-300/40 px-3 py-2 rounded-md'
-                            }
-                            >
-                            Catalogo
-                        </NavLink>
-                        <NavLink
-                            to="/contactos" 
-                            className={({isActive})=>
-                                isActive ? 'relative hover:bg-green-300/40 px-3 py-2 rounded-md text-red-700/80 font-bold bg-green-300/40' : 'relative hover:bg-green-300/40 px-3 py-2 rounded-md'
-                            }>
-                            Contactos
-                        </NavLink>
-                        <NavLink
-                            to="/kart" 
-                            className={({isActive})=>
-                                isActive ? 'relative hover:bg-green-300/40 px-3 py-2 rounded-md text-red-700/80 font-bold bg-green-300/40' : 'relative hover:bg-green-300/40 px-3 py-2 rounded-md'
-                            }>
-                            <i className="ri-shopping-cart-2-line"></i>
-                            <span className={flag}>
-                                {kartCount}
-                            </span>
-                        </NavLink>
-                    </div>
-                    <div className="md:hidden">
-                        <button
-                        onClick={toggleMenu}
-                        className="p-2 rounded-md"
-                        aria-label="Toggle menu"
-                        >
-                        <svg
-                            className="h-6 w-6"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d={
-                                isMenuOpen
-                                ? "M6 18L18 6M6 6l12 12"
-                                : "M4 6h16M4 12h16m-7 6h7"
-                            }
-                            />
-                        </svg>
-                        </button>
                     </div>
                 </div>
             </div>
-            {isMenuOpen && (
-                <div className="md:hidden">
-                    <div className="px-2 pt-2 pb-3 space-y-1">
-                        <Link
-                            to="/nosotros"
-                            className="block hover:bg-green-300/40 px-3 py-2 rounded-md">
-                            Nosotros
-                        </Link>
-                        <Link
-                            to="/colecciones"
-                            className="block hover:bg-green-300/40 px-3 py-2 rounded-md"
-                            >
-                            Catalogo
-                        </Link>
-                        <Link
-                            to="/contactos" 
-                            className="block hover:bg-green-300/40 px-3 py-2 rounded-md">
-                            Contactos
-                        </Link>
-                        <NavLink
-                            to="/kart" 
-                            className={({isActive})=>
-                                isActive ? 'relative hover:bg-green-300/40 px-3 py-2 rounded-md text-red-700/80 font-bold bg-green-300/40' : 'relative hover:bg-green-300/40 px-3 py-2 rounded-md'
-                            }>
-                            <i className="ri-shopping-cart-2-line"></i>
-                            <span className={flag}>
-                                {kartCount}
-                            </span>
-                        </NavLink>
-                    </div>
-                </div>
-            )}
-            
         </nav>
     );
     };
 
     export default Header;
-

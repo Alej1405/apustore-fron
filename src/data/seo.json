@@ -1,0 +1,13 @@
+{
+  "_nota": "Metadatos de las paginas fijas. Los lee el componente Meta en el navegador y scripts/prerender.mjs al compilar, para que Google y WhatsApp vean el mismo texto. Si el CMS trae datos, el prerender los usa por encima de estos.",
+  "sitio": "https://apustore-ec.com",
+  "nombre": "Apustore",
+  "imagen": "/og-image.jpg",
+  "paginas": [
+    { "ruta": "/", "archivo": "", "titulo": "Inicio | Apustore", "tituloCorto": "Apustore Moda Sostenible", "descripcion": "Apustore no solo es ropa, es un respiro a la naturaleza. Moda sostenible y diseños exclusivos en serigrafía y DTF.", "cambia": "weekly", "prioridad": "1.0" },
+    { "ruta": "/colecciones", "archivo": "colecciones", "titulo": "Catálogo | Apustore", "tituloCorto": "Catálogo de productos", "descripcion": "Recuerda que la moda sostenible es también una forma de cuidar el planeta. Elige tu prenda y pídela por WhatsApp.", "cambia": "daily", "prioridad": "0.9" },
+    { "ruta": "/nosotros", "archivo": "nosotros", "titulo": "Nosotros | Apustore", "tituloCorto": "Conoce Apustore", "descripcion": "Productos de calidad, con costos competitivos y diseños exclusivos en prendas de estampado.", "cambia": "monthly", "prioridad": "0.6" },
+    { "ruta": "/contactos", "archivo": "contactos", "titulo": "Contactos | Apustore", "tituloCorto": "Contacta a Apustore", "descripcion": "Estamos cerca de ti, te ayudamos en todo lo que requieras. También personalizamos tus diseños.", "cambia": "monthly", "prioridad": "0.6" },
+    { "ruta": "/kart", "archivo": "kart", "titulo": "Carrito | Apustore", "tituloCorto": "Tu pedido en Apustore", "descripcion": "Confirma tu pedido y envíalo por WhatsApp.", "cambia": "monthly", "prioridad": "0.3" }
+  ]
+}

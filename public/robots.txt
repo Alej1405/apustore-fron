@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /kart
+
+Sitemap: https://apustore-ec.com/sitemap.xml

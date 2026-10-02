@@ -1,63 +1,53 @@
-import { Link } from "react-router-dom"
-import { Helmet } from "react-helmet"
+import Meta from "../components/Meta"
+import Compartir from "../components/Compartir"
+import { useAppStore } from "../stores/useAppStore"
+import { contactoRespaldo } from "../data/respaldo"
+import { whatsappLink } from "../utils/formato"
 
 export default function ContactosPage() {
+  const contacto = useAppStore((state) => state.contacto) ?? contactoRespaldo
+
+  const canales = [
+    contacto.whatsapp && { href: whatsappLink(contacto.whatsapp, 'Hola Apustore'), icono: 'ri-whatsapp-line', titulo: 'WhatsApp', detalle: contacto.whatsapp, externo: true },
+    contacto.telefono && { href: `tel:${contacto.telefono}`, icono: 'ri-phone-line', titulo: 'Llámanos', detalle: contacto.telefono },
+    contacto.email && { href: `mailto:${contacto.email}`, icono: 'ri-mail-line', titulo: 'Correo', detalle: contacto.email },
+    contacto.redes.instagram && { href: contacto.redes.instagram, icono: 'ri-instagram-line', titulo: 'Instagram', detalle: '@apustore', externo: true },
+    contacto.redes.facebook && { href: contacto.redes.facebook, icono: 'ri-facebook-circle-line', titulo: 'Facebook', detalle: 'Apu Store', externo: true },
+  ].filter((c): c is { href: string, icono: string, titulo: string, detalle: string, externo?: boolean } => Boolean(c))
+
   return (
     <>
-      <Helmet>
-        <title>Contactos | Apustore</title>
-      </Helmet>
-        <h1 className="text-center uppercase text-white text-md md:text-1xl font-bold mt-6">
-          contactos
-        </h1>
-        <div className="mt-8 mb-6">
-          <p className="text-m text-center text-white font-light mt-2">
-            Estamos cerca de ti, te ayudamos en todo lo que requieras.
-          </p>
-          <p className="text-s text-center text-white font-light mt-1">
-            Recuerda que tambien personalizamos tus diseños.
-          </p>
+      <Meta ruta="/contactos" />
+      <div className="mx-auto max-w-5xl px-4 py-8 md:px-8 md:py-14">
+        <h1 className="font-display text-5xl font-extrabold tracking-[-0.03em] text-white md:text-7xl animate-revelar">Contactos</h1>
+        <p className="mt-3 max-w-xl text-papel/85">
+          Estamos cerca de ti, te ayudamos en todo lo que requieras. Recuerda que también personalizamos tus diseños.
+        </p>
+        <div className="mt-3"><Compartir ruta="/contactos" titulo="Contactos de Apustore" /></div>
+
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          <ul className="grid gap-3">
+            {canales.map((c, i) => (
+              <li key={c.href} className="animate-subir" style={{ animationDelay: `${i * 60}ms` }}>
+                <a href={c.href} {...(c.externo ? { target: '_blank', rel: 'noopener' } : {})} className="presionable flex items-center gap-4 rounded-2xl bg-white/90 p-4 text-bosque hover:bg-white">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-full bg-bosque text-xl text-hoja"><i className={c.icono} aria-hidden="true"></i></span>
+                  <span className="min-w-0">
+                    <span className="block font-display font-bold">{c.titulo}</span>
+                    <span className="block truncate text-sm text-bosque/70">{c.detalle}</span>
+                  </span>
+                  <i className="ri-arrow-right-up-line ml-auto text-bosque/40" aria-hidden="true"></i>
+                </a>
+              </li>
+            ))}
+          </ul>
+          {contacto.mapa_embed && (
+            <div className="overflow-hidden rounded-3xl bg-white/10 animate-subir [animation-delay:200ms]">
+              <iframe src={contacto.mapa_embed} title="Ubicación de Apustore" className="h-80 w-full border-0 md:h-full md:min-h-96" loading="lazy"></iframe>
+              {contacto.direccion && <p className="px-4 py-3 text-sm text-papel/80"><i className="ri-map-pin-line text-hoja" aria-hidden="true"></i> {contacto.direccion}</p>}
+            </div>
+          )}
         </div>
-        <div className="md:h-full grid grid-rows-1 m-auto items-center md:grid-cols-2 justify-center md:w-5/6 w-1/2 gap-6 mt-6 mb-6">
-          <div className=" bg-white/50 backdrop-blur-sm rounded-lg mb-4 pb-8">
-            <h3 className="text-center text-green-800 font-bold mt-4">
-              Estamos a una llamada a un mensaje.
-            </h3>
-            <ul className="text-center">
-              <li className=" text-green-900 font-light mt-6">
-                <i className="ri-phone-fill"></i>
-                  <span>  0960154992</span>
-              </li>
-              <li className=" text-green-900 font-light mt-6">
-                <i className="ri-whatsapp-line"></i>
-                  <Link
-                    to="https://wa.me/593960154992"
-                  >
-                    Whatsapp 
-                  </Link>
-              </li>
-              <li className=" text-green-900 font-light mt-6">
-                <i className="ri-facebook-circle-line"></i>
-                  <Link
-                    to="https://www.facebook.com/profile.php?id=100089894168343&mibextid=ZbWKwL"
-                  >
-                    Facebook 
-                  </Link>
-              </li>
-              <li className=" text-green-900 font-light mt-6">
-                <i className="ri-instagram-line"></i>
-                  <Link
-                    to="https://www.instagram.com/apu_store222/profilecard/?igsh=MTgyaGptNXUybTJhMQ=="
-                  >
-                    Intagram 
-                  </Link>
-              </li>
-            </ul>
-          </div>
-          <div className="m-auto">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.7282438550274!2d-78.5245563247857!3d-0.38500609961120663!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91d5a460133fffff%3A0xb3877f549365d77d!2sparque%20central%20Uyumbicho!5e0!3m2!1ses!2sec!4v1737078304179!5m2!1ses!2sec" width="500" height="300" loading="lazy"></iframe>
-          </div>
-        </div>
+      </div>
     </>
   )
 }

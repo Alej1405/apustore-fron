@@ -2,8 +2,8 @@ import { useEffect } from "react"
 import { useAppStore } from "../stores/useAppStore"
 import Colecion from "../components/Colecion"
 import Producto from "../components/Producto"
-import { Suspense } from "react"
-import { Helmet} from 'react-helmet-async';
+import Meta from "../components/Meta"
+import Compartir from "../components/Compartir"
 
 export default function ColeccionesPage() {
 
@@ -11,62 +11,42 @@ export default function ColeccionesPage() {
   const colecciones = useAppStore((state) => state.colecciones )
   const fetchProducto = useAppStore((state)=>state.fetchProducto)
   const productos = useAppStore ((state)=>state.productos)
-  
-
 
   useEffect(() =>{
     fetchColeccion()
     fetchProducto()
-
   },[fetchColeccion, fetchProducto])
-
-
 
   return (
     <>
-      <Helmet>
-          <title>Catalogo | Apustore</title>
-          <meta property="og:title" content="Catalogo de productos" />
-          <meta property="og:description" content="Apustore no solo es ropa, es un respiro a la naturaleza" />
-          <meta property="og:image" content="https://apustore-ec.com/hero1.svg" />
-          <meta property="og:url" content="https://apustore-ec.com/" />
-      </Helmet>
-      {/* titulo de la seccion */}
-        <div className="bg-green-900/40 backdrop-blur-sm">
-          <h1 className="text-center text-s md:text-3xl text-white mt-6 mb-4 font-black">
-            Catálogo.
-            <br />
-            <small className="text-white text-center text-lg font-thin">
-              Recuerda que la <span className="text-green-500 uppercase font-bold">moda sostenible</span> es tambien un forma de <span className="text-green-500 uppercase font-bold">cuidar el planeta</span>
-            </small>
-          </h1>
+      <Meta ruta="/colecciones" />
+      <header className="mx-auto max-w-7xl px-4 pt-8 md:px-8 md:pt-12">
+        <h1 className="font-display text-4xl font-extrabold tracking-[-0.02em] text-white md:text-6xl animate-revelar">Catálogo</h1>
+        <p className="mt-2 max-w-xl text-papel/80">
+          Recuerda que la <span className="font-semibold text-hoja">moda sostenible</span> es también una forma de <span className="font-semibold text-hoja">cuidar el planeta</span>.
+        </p>
+        <div className="mt-3"><Compartir ruta="/colecciones" titulo="Catálogo de Apustore" /></div>
+      </header>
+
+      {/* colecciones: carrusel en el celular, grilla en escritorio */}
+      <section aria-label="Colecciones" className="mx-auto max-w-7xl md:px-8">
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 py-6 md:grid md:grid-cols-3 md:px-0">
+          {colecciones.map((coleccion) => (
+            <Colecion key={coleccion.id} coleccion={coleccion} />
+          ))}
         </div>
-      {/* contenedor de la coleccion */}
-      <div className="w-5/6 bg-white/40 rounded-lg backdrop-blur-sm items-center justify-center m-auto mt-6 mb-3">
-        {/* contenedor de carrusel de colecciones */}
-          <Suspense fallback={"Cargando..."}>
-            <div className="grid grid-cols-3 w-full items-center justify-center p-4 overflow-x-auto whitespace-nowrap scroll-smooth">
-              <div> 
-              {colecciones.map((coleccion) => (
-              <Colecion
-                key={coleccion.id}
-                coleccion={coleccion} />
-              ))}
-              </div>
+      </section>
+
+      <section aria-labelledby="productos" className="mx-auto max-w-7xl px-4 md:px-8">
+        <h2 id="productos" className="mb-4 font-display text-2xl font-bold text-white md:text-3xl">Destacados</h2>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
+          {productos.map((producto, i) => (
+            <div key={producto.id} className="animate-subir" style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}>
+              <Producto producto={producto} />
             </div>
-          </Suspense>
-        {/* contenedor de productos / detalles de cada prodcuto */}
-        <Suspense fallback={"Cargando..."}>
-          <div className="grid md:grid-cols-3 grid-rows-1 gap-10 justify-center items-center p-4">
-              {productos.map((producto) => (
-                <Producto
-                  key={producto.id}
-                  producto={producto}
-                />
-              ))}
-          </div>
-        </Suspense>
-      </div>
+          ))}
+        </div>
+      </section>
     </>
   )
 }

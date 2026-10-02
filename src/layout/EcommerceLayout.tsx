@@ -1,31 +1,14 @@
-
-import Header from "../components/Header"
-import Footer from "../components/Footer"
+import Marco from "../components/Marco"
 import Modal from "../components/Modal"
 import Notification from "../components/Notification"
-import { Outlet } from "react-router-dom"
-import { useEffect } from "react"
-import { useAppStore } from "../stores/useAppStore"
 
-export default function IndexPages() {
-    const laodFromStorage = useAppStore((state)=> state.laodFromStorage)
-
-
-    useEffect(()=>{
-        laodFromStorage()
-    }, [laodFromStorage])
+//layout de las vistas de comercio electronico: mismo cascaron, fondo de prendas
+export default function EcommerceLayout() {
     return (
-        
-        <div className=" bg-products bg-no-repeat bg-cover h-full bg-fixed">
-                <Header />
-                    <Outlet />
-                <Footer />
-                <Modal />
-                <Notification />
-
-        </div>
-
-            
-
+        <>
+            <Marco fondo="bg-products" />
+            <Modal />
+            <Notification />
+        </>
     )
 }

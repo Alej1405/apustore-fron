@@ -1,6 +1,7 @@
 import { StateCreator } from "zustand"
-import { getColecciones, getProductos, getProductosByColeccion, getProductoById } from "../services/ColeccionService"
+import { getColecciones, getProductos, getProductosByColeccion, getProductoBySlug } from "../services/ColeccionService"
 import type { Colecciones, Productos, Producto } from "../types"
+import { coleccionesRespaldo, productosRespaldo } from "../data/respaldo"
 
 export type ColeccionSliceType ={
     colecciones: Colecciones
@@ -10,8 +11,8 @@ export type ColeccionSliceType ={
 
     fetchColecciones: () => Promise<void>
     fetchProducto: () => Promise<void>
-    selectColeccion: (id: number) => Promise<void>
-    selectProducto: (id: number) => Promise<void>
+    selectColeccion: (slug: string) => Promise<void>
+    selectProducto: (slug: string) => Promise<void>
     closeModal: () => void
 }
 
@@ -24,28 +25,33 @@ export const createColeccionesSlice : StateCreator<ColeccionSliceType> = (set) =
     modal: false,
 
     fetchColecciones: async () => {
-        const colecciones = await getColecciones()
+        const api = await getColecciones().catch(() => undefined)
+        //sin colecciones en el ERP se muestra el catalogo de muestra
+        const colecciones = api?.length ? api : coleccionesRespaldo
         set({
             colecciones
         })
     },
 
     fetchProducto: async ()=>{
-        const productos = await getProductos()
+        const api = await getProductos().catch(() => undefined)
+        const productos = api?.length ? api : productosRespaldo
         set({
             productos
         })
     },
     
-    selectColeccion: async (id: number) => {
-        const productos = await getProductosByColeccion(id)
+    selectColeccion: async (slug: string) => {
+        const api = await getProductosByColeccion(slug).catch(() => [])
+        const productos = api.length ? api : productosRespaldo.filter((p) => p.store_category?.slug === slug)
         set({
             productos
         })
     },
     
-    selectProducto: async (id: number)=>{
-        const producto = await getProductoById(id)
+    selectProducto: async (slug: string)=>{
+        const producto = await getProductoBySlug(slug).catch(() => undefined) ?? productosRespaldo.find((p) => p.slug === slug)
+        if(!producto) return
         set({
             producto,
             modal: true

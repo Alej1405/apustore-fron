@@ -1,0 +1,36 @@
+Options -MultiViews
+RewriteEngine On
+RewriteBase /
+
+# Open Graph por página. WhatsApp y Facebook no ejecutan JavaScript: leen el <head>
+# del HTML. scripts/prerender.mjs escribe un HTML por producto, por colección y por
+# página fija con sus propios meta tags; estas reglas los entregan en su URL normal
+# (reescritura interna, la URL del navegador no cambia).
+#
+# Si el archivo no existe — un producto creado en el ERP después del último
+# despliegue — la condición falla y la ruta cae al enrutador de React como siempre.
+RewriteCond %{DOCUMENT_ROOT}/_productos/$1.html -f
+RewriteRule ^producto/([^/.]+)/?$ /_productos/$1.html [L]
+
+RewriteCond %{DOCUMENT_ROOT}/_colecciones/$1.html -f
+RewriteRule ^coleccion/productos/([^/.]+)/?$ /_colecciones/$1.html [L]
+
+RewriteCond %{DOCUMENT_ROOT}/_paginas/$1.html -f
+RewriteRule ^([a-z0-9-]+)/?$ /_paginas/$1.html [L]
+
+# SPA: cualquier otra ruta la resuelve React.
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+<IfModule mod_headers.c>
+  # Assets con hash de Vite: inmutables.
+  <FilesMatch "\.(js|css|woff2)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  # HTML: siempre revalidar, para que un despliegue se vea de inmediato.
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
