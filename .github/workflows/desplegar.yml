@@ -131,20 +131,28 @@ jobs:
             || { echo "::error::Sin estos secretos el rsync falla con 'Permission denied', que parece un problema del servidor y no lo es."; exit 1; }
           echo "Los 4 secretos del servidor tienen valor."
 
-      # El secreto guarda la clave en base64, en una sola línea. Una clave OpenSSH
-      # ocupa varias y basta con que el copiar y pegar junte dos para que deje de
-      # ser válida: ssh falla con "error in libcrypto", que no dice nada de eso.
-      # Se genera con:  base64 < ~/.ssh/despliegue_linkcargo | tr -d '\n' | pbcopy
+      # El secreto acepta la clave de dos formas: en base64 de una sola línea
+      # (base64 < ~/.ssh/despliegue_linkcargo | tr -d '\n' | pbcopy) o pegada tal
+      # cual, con sus líneas BEGIN/END. Se limpian espacios y saltos que mete el
+      # copiar y pegar, que es lo que rompía "base64 -d" con "invalid input".
       - name: Preparar el acceso SSH
+        env:
+          CLAVE: ${{ secrets.APUSTORE_SSH_KEY }}
+          HUELLAS: ${{ secrets.APUSTORE_KNOWN_HOSTS }}
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s' "${{ secrets.APUSTORE_SSH_KEY }}" | base64 -d > ~/.ssh/despliegue
+          if printf '%s' "$CLAVE" | grep -q 'BEGIN OPENSSH PRIVATE KEY'; then
+            printf '%s\n' "$CLAVE" | tr -d '\r' > ~/.ssh/despliegue
+          else
+            printf '%s' "$CLAVE" | tr -d ' \n\r\t' | base64 -d > ~/.ssh/despliegue 2>/dev/null \
+              || { echo "::error::APUSTORE_SSH_KEY no es la llave: no es base64 ni una clave OpenSSH. ¿Se pegó otro valor (por ejemplo el token)? Vuelve a copiarla."; exit 1; }
+          fi
           chmod 600 ~/.ssh/despliegue
-          printf '%s\n' "${{ secrets.APUSTORE_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf '%s\n' "$HUELLAS" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
           ssh-keygen -y -f ~/.ssh/despliegue > /dev/null \
-            || { echo "::error::APUSTORE_SSH_KEY no es una clave válida. Regenérala en base64."; exit 1; }
+            || { echo "::error::APUSTORE_SSH_KEY no es una clave válida. Vuelve a copiarla."; exit 1; }
 
       # --delete deja el servidor idéntico al build, pero .well-known guarda el
       # reto de Let's Encrypt (si se borra, la renovación del SSL falla) y
