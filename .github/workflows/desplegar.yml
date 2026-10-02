@@ -114,18 +114,19 @@ jobs:
           path: dist
 
       - name: Comprobar que los secretos del servidor llegaron
+        # Cada secreto va en su propia variable: APUSTORE_KNOWN_HOSTS tiene varias
+        # líneas, y leerlos todos juntos línea por línea partía esa huella en
+        # pedazos que parecían secretos vacíos.
         env:
-          SECRETOS: |
-            APUSTORE_HOST=${{ secrets.APUSTORE_HOST }}
-            APUSTORE_USUARIO=${{ secrets.APUSTORE_USUARIO }}
-            APUSTORE_KNOWN_HOSTS=${{ secrets.APUSTORE_KNOWN_HOSTS }}
-            APUSTORE_SSH_KEY=${{ secrets.APUSTORE_SSH_KEY }}
+          APUSTORE_HOST: ${{ secrets.APUSTORE_HOST }}
+          APUSTORE_USUARIO: ${{ secrets.APUSTORE_USUARIO }}
+          APUSTORE_KNOWN_HOSTS: ${{ secrets.APUSTORE_KNOWN_HOSTS }}
+          APUSTORE_SSH_KEY: ${{ secrets.APUSTORE_SSH_KEY }}
         run: |
           faltan=0
-          while IFS='=' read -r nombre valor; do
-            [ -z "$nombre" ] && continue
-            if [ -z "$valor" ]; then echo "::error::Falta el secreto $nombre"; faltan=1; fi
-          done <<< "$SECRETOS"
+          for nombre in APUSTORE_HOST APUSTORE_USUARIO APUSTORE_KNOWN_HOSTS APUSTORE_SSH_KEY; do
+            if [ -z "${!nombre}" ]; then echo "::error::Falta el secreto $nombre"; faltan=1; fi
+          done
           [ "$faltan" -eq 0 ] \
             || { echo "::error::Sin estos secretos el rsync falla con 'Permission denied', que parece un problema del servidor y no lo es."; exit 1; }
           echo "Los 4 secretos del servidor tienen valor."
